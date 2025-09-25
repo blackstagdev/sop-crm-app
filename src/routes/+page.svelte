@@ -75,7 +75,7 @@
 
 {#if loading}
 	<div class="loading">⏳ Loading affiliates...</div>
-{:else}
+{:else if affiliates?.length}
 	<p>Total affiliates: {$lastSale.length}</p>
 	<pre>{JSON.stringify($lastSale, null, 2)}</pre>
 {/if}
