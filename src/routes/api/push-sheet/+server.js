@@ -2,27 +2,45 @@ import { json } from "@sveltejs/kit";
 import { replaceSheet } from "$lib/googleSheet.js";
 
 const SPREADSHEET_ID = "1KKmny7DXdsIr0g3437N3m9B4KGQwI0ygeXrr12vkkxA";
-const SHEET_NAME = "Auto Last Sale";
 
 export async function POST({ request }) {
   try {
-    const affiliates = await request.json();
+    const { affiliates, sheet } = await request.json();
 
-    // ✅ filter only complete affiliates
-    const rows = affiliates
-      .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.lastOrder)
-      .map(a => [
-        a.id,
-        a.name,
-        a.email,
-        a.revenue,
-        a.referralCode,
-        a.lastOrder
-      ]);
+    if (!sheet) {
+      throw new Error("Missing `sheet` parameter");
+    }
 
-    await replaceSheet(SPREADSHEET_ID, SHEET_NAME, rows);
+    // transform based on target sheet
+    let rows = [];
+    switch (sheet) {
+      case "Last Sale Date":
+        rows = affiliates
+          .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.lastSale)
+          .map(a => [a.id, a.name, a.email, a.revenue, a.referralCode, a.lastSale]);
+        break;
 
-    return json({ success: true, inserted: rows.length });
+      case "First Sale Date":
+        rows = affiliates
+        .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.firstSale)
+        .map(a => [a.id, a.name, a.email, a.revenue, a.referralCode, a.firstSale]);
+        break;
+
+      case "Last Order Date":
+        rows = affiliates.map(a => [a.id, a.referralCode]);
+        break;
+      
+      case "First Order Date":
+        rows = affiliates.map(a => [a.id, a.referralCode]);
+        break;
+
+      default:
+        throw new Error(`Unknown sheet: ${sheet}`);
+    }
+
+    await replaceSheet(SPREADSHEET_ID, sheet, rows);
+
+    return json({ success: true, sheet, inserted: rows.length });
   } catch (err) {
     console.error("❌ Push failed:", err);
     return json({ success: false, error: err.message }, { status: 500 });
