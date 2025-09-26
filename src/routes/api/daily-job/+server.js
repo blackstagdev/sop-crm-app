@@ -6,13 +6,19 @@ export async function GET(event) {
 		const res = await event.fetch('/api/goaffpro');
 		const data = await res.json();
 
+		const sheets = ["Last Sale Date", "First Sale Date", "Last Order Date", "First Order Date"];
+		const results = [];
+
 		// 2. Push to Google Sheets
-		const pushRes = await event.fetch('/api/push-sheet', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(data)
-		});
-		const result = await pushRes.json();
+		for (const sheet of sheets) {
+			const pushRes = await event.fetch('/api/push-sheet', {
+			  method: 'POST',
+			  headers: { 'Content-Type': 'application/json' },
+			  body: JSON.stringify({ data, sheet })
+			});
+			const result = await pushRes.json();
+			results.push(result);
+		  }
 
 		return json({ success: true, result });
 	} catch (err) {
