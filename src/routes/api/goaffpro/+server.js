@@ -38,31 +38,37 @@ export async function GET() {
 
       // 5. Customers summary (global across all affiliates)
       const customerMap = new Map();
+
       for (const o of orders) {
         const key = o.customer?.id ?? o.customer?.email ?? o.customer_email;
         if (!key) continue;
-  
+      
         const createdAt = new Date(o.created);
-  
+      
         if (!customerMap.has(key)) {
           customerMap.set(key, {
             id: o.customer?.id ?? null,
             name: o.customer?.name ?? null,
             email: o.customer?.email ?? o.customer_email ?? null,
+            orderCount: 1,
             firstOrderDate: createdAt,
             lastOrderDate: createdAt
           });
         } else {
           const c = customerMap.get(key);
+          c.orderCount++;
           if (createdAt < c.firstOrderDate) c.firstOrderDate = createdAt;
           if (createdAt > c.lastOrderDate) c.lastOrderDate = createdAt;
+          customerMap.set(key, c);
         }
       }
-
+      
       const customerResults = [...customerMap.values()].map((c) => ({
-        ...c,
-        firstOrderDate: c.firstOrderDate.toISOString().split("T")[0],
-        lastOrderDate: c.lastOrderDate.toISOString().split("T")[0]
+        id: c.id,
+        name: c.name,
+        email: c.email,
+        firstOrderDate: c.orderCount === 1 ? c.firstOrderDate.toISOString().split("T")[0] : null,
+        lastOrderDate: c.lastOrderDate ? c.lastOrderDate.toISOString().split("T")[0] : null
       }));
   
       // 6. Final response object
