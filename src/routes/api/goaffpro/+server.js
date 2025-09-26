@@ -1,12 +1,10 @@
-import { getAffiliates, getOrders, getLastSaleDate, getFirstSaleDate} from "$lib/goaffpro";
+import { getAffiliates, getOrders, getLastSaleDate, getFirstSaleDate, getFirstOrder, getLastOrder} from "$lib/goaffpro";
 
 export async function GET() {
   try {
     // 1. Fetch all affiliates
     const affiliatesRes = await getAffiliates();
     const affiliates = affiliatesRes.affiliates ?? affiliatesRes.data ?? [];
-
-
 
     // 2. Fetch all orders (without affiliate_id filter)
     const ordersRes = await getOrders(); // don't pass id
@@ -21,34 +19,71 @@ export async function GET() {
       ordersByAffiliate.get(order.affiliate_id).push(order);
     }
 
-    // 4. Build results
-    const results = affiliates.map((affiliate) => {
-      const affOrders = ordersByAffiliate.get(affiliate.id) ?? [];
-      const lastSaleDate = getLastSaleDate(affOrders);
-      const firstSaleDate = getFirstSaleDate(affOrders);
+   // 4. Affiliates summary
+   const affiliateResults = affiliates.map((affiliate) => {
+    const affOrders = ordersByAffiliate.get(affiliate.id) ?? [];
+    const lastSaleDate = getLastSaleDate(affOrders);
+    const firstSaleDate = getFirstSaleDate(affOrders);
 
-      return {
-        id: affiliate.id,
-        name: affiliate.name,
-        email: affiliate.email ? affiliate.email.toLowerCase() : null,
-        lastSale: lastSaleDate
-    ? lastSaleDate.toISOString().split("T")[0] 
-    : null,
-    firstSale: firstSaleDate
-    ? firstSaleDate.toISOString().split("T")[0] 
-    : null,
-        revenue: affiliate.subtotal_revenue,
-        referralCode: affiliate.ref_code
+    return {
+      id: affiliate.id,
+      name: affiliate.name,
+      email: affiliate.email ? affiliate.email.toLowerCase() : null,
+      lastSale: lastSaleDate ? lastSaleDate.toISOString().split("T")[0] : null,
+      firstSale: firstSaleDate ? firstSaleDate.toISOString().split("T")[0] : null,
+      revenue: affiliate.subtotal_revenue,
+      referralCode: affiliate.ref_code
+    };
+  });
+
+      // 5. Customers summary (global across all affiliates)
+      const customerMap = new Map();
+      for (const o of orders) {
+        const key = o.customer?.id ?? o.customer?.email ?? o.customer_email;
+        if (!key) continue;
+  
+        const createdAt = new Date(o.created);
+  
+        if (!customerMap.has(key)) {
+          customerMap.set(key, {
+            id: o.customer?.id ?? null,
+            name: o.customer?.name ?? null,
+            email: o.customer?.email ?? o.customer_email ?? null,
+            firstOrderDate: createdAt,
+            lastOrderDate: createdAt
+          });
+        } else {
+          const c = customerMap.get(key);
+          if (createdAt < c.firstOrderDate) c.firstOrderDate = createdAt;
+          if (createdAt > c.lastOrderDate) c.lastOrderDate = createdAt;
+        }
+      }
+
+      const customerResults = [...customerMap.values()].map((c) => ({
+        ...c,
+        firstOrderDate: c.firstOrderDate.toISOString().split("T")[0],
+        lastOrderDate: c.lastOrderDate.toISOString().split("T")[0]
+      }));
+  
+      // 6. Final response object
+      const completeResults = {
+        affiliates: affiliateResults.filter(
+          (r) =>
+            r.id &&
+            r.name &&
+            r.email &&
+            r.revenue &&
+            r.referralCode &&
+            r.lastSale ||
+            r.firstSale
+        ),
+        customers: customerResults,
+        partners: affiliates
       };
-    });
-
-    const completeResults = results.filter(r =>
-      r.id && r.name && r.email && r.revenue && r.referralCode && r.lastSale && r.firstSale
-    );
-
-    return new Response(JSON.stringify(completeResults, null, 2), {
-      headers: { "Content-Type": "application/json" },
-    });
+  
+      return new Response(JSON.stringify(completeResults, null, 2), {
+        headers: { "Content-Type": "application/json" }
+      });
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }

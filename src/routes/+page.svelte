@@ -13,7 +13,7 @@
 			const res = await fetch('/api/goaffpro');
 			const data = await res.json();
 			lastSale.set(data);
-			affiliates = data;
+			console.log(data);
 		} catch (err) {
 			console.error('Error loading affiliates:', err);
 		} finally {

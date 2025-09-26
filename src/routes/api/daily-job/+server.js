@@ -6,7 +6,7 @@ export async function GET(event) {
 		const res = await event.fetch('/api/goaffpro');
 		const data = await res.json();
 
-		const sheets = ["Last Sale Date", "First Sale Date", "Last Order Date", "First Order Date"];
+		const sheets = ["Last Sale Date", "First Sale Date", "Last Order Date", "First Order Date", "Partners"];
 		const results = [];
 
 		// 2. Push to Google Sheets
@@ -20,7 +20,7 @@ export async function GET(event) {
 			results.push(result);
 		  }
 
-		return json({ success: true, result });
+		return json({ success: true, results });
 	} catch (err) {
 		console.error('Daily job failed:', err);
 		return json({ success: false, error: String(err) }, { status: 500 });

@@ -5,7 +5,7 @@ const SPREADSHEET_ID = "1KKmny7DXdsIr0g3437N3m9B4KGQwI0ygeXrr12vkkxA";
 
 export async function POST({ request }) {
   try {
-    const { affiliates, sheet } = await request.json();
+    const { affiliates, customers, partners, sheet } = await request.json();
 
     if (!sheet) {
       throw new Error("Missing `sheet` parameter");
@@ -27,12 +27,20 @@ export async function POST({ request }) {
         break;
 
       case "Last Order Date":
-        rows = affiliates.map(a => [a.id, a.referralCode]);
+        rows = customers
+          .filter((c) => c.id && c.name && c.email && c.lastOrderDate)
+          .map((c) => [c.id, c.name, c.email, c.lastOrderDate]);
         break;
       
       case "First Order Date":
-        rows = affiliates.map(a => [a.id, a.referralCode]);
+        rows = customers
+          .filter((c) => c.id && c.name && c.email && c.firstOrderDate)
+          .map((c) => [c.id, c.name, c.email, c.firstOrderDate]);
         break;
+
+      case "Partners":
+          rows = partners?.map((p) => Object.values(p)) ?? [];
+          break;
 
       default:
         throw new Error(`Unknown sheet: ${sheet}`);
