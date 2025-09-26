@@ -31,47 +31,73 @@ export function getFirstSaleDate(orders) {
     return null;
   }
 
-  export function getLastOrder(orders) {
-    if (!orders.length) return null;
+  export function getLastOrder(allOrders) {
+    if (!allOrders.length) return null;
   
-    const sorted = [...orders].sort((a, b) => new Date(b.created) - new Date(a.created));
-    const last = sorted[0];
+    const byCustomer = new Map();
+    for (const o of allOrders) {
+      const key = o.customer?.id ?? o.customer?.email ?? o.customer_email;
+      if (!key) continue;
   
-    return {
-      date: new Date(last.created),
-      customerName: last.customer?.name ?? null,
-      customerEmail: last.customer?.email ?? last.customer_email ?? null
-    };
+      const createdAt = new Date(o.created);
+      if (!byCustomer.has(key)) {
+        byCustomer.set(key, [createdAt]);
+      } else {
+        byCustomer.get(key).push(createdAt);
+      }
+    }
+  
+    const results = [];
+    for (const [key, dates] of byCustomer.entries()) {
+      dates.sort((a, b) => a - b);
+      const lastOrderDate = dates[dates.length - 1].toISOString().split("T")[0];
+  
+      results.push({
+        customerId: key,
+        lastOrderDate
+      });
+    }
+  
+    return results;
   }
   
+  
 
-export function getFirstOrder(allOrders) {
-  if (!allOrders.length) return null;
-
-  // Count orders globally per unique customer
-  const counts = new Map();
-  for (const o of allOrders) {
-    const key = o.customer?.id ?? o.customer?.email ?? o.customer_email;
-    if (!key) continue;
-    counts.set(key, (counts.get(key) ?? 0) + 1);
+  export function getFirstOrder(allOrders) {
+    if (!allOrders.length) return null;
+  
+    // Group orders per customer
+    const byCustomer = new Map();
+    for (const o of allOrders) {
+      const key = o.customer?.id ?? o.customer?.email ?? o.customer_email;
+      if (!key) continue;
+  
+      const createdAt = new Date(o.created);
+      if (!byCustomer.has(key)) {
+        byCustomer.set(key, [createdAt]);
+      } else {
+        byCustomer.get(key).push(createdAt);
+      }
+    }
+  
+    // Collect results
+    const results = [];
+    for (const [key, dates] of byCustomer.entries()) {
+      dates.sort((a, b) => a - b);
+      let firstOrderDate = null;
+  
+      if (dates.length === 1) {
+        firstOrderDate = dates[0].toISOString().split("T")[0];
+      }
+  
+      results.push({
+        customerId: key,
+        firstOrderDate
+      });
+    }
+  
+    return results;
   }
-
-  // Keep only customers who appear exactly once globally
-  const firstTimers = allOrders.filter(o => {
-    const key = o.customer?.id ?? o.customer?.email ?? o.customer_email;
-    return key && counts.get(key) === 1;
-  });
-
-  if (!firstTimers.length) return null;
-
-  // Get the earliest first-timer (by created date)
-  const first = firstTimers.sort((a, b) => new Date(a.created) - new Date(b.created))[0];
-
-  return {
-    date: new Date(first.created),
-    customerName: first.customer?.name ?? null,
-    customerEmail: first.customer?.email ?? first.customer_email ?? null
-  };
-}
+  
 
   
