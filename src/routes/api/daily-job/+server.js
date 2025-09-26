@@ -14,7 +14,7 @@ export async function GET(event) {
 			const pushRes = await event.fetch('/api/push-sheet', {
 			  method: 'POST',
 			  headers: { 'Content-Type': 'application/json' },
-			  body: JSON.stringify({ data, sheet })
+			  body: JSON.stringify({ ...data, sheet })
 			});
 			const result = await pushRes.json();
 			results.push(result);

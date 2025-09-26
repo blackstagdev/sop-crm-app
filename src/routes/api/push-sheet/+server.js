@@ -7,6 +7,8 @@ export async function POST({ request }) {
   try {
     const { affiliates, customers, partners, sheet } = await request.json();
 
+    console.log(affiliates, customers, partners, sheet)
+  
     if (!sheet) {
       throw new Error("Missing `sheet` parameter");
     }
