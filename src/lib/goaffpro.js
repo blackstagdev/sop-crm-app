@@ -14,9 +14,20 @@ export async function getOrders() {
   return res.json();
 }
 
-export function getLastOrderDate(orders) {
+export function getLastSaleDate(orders) {
     if (!orders.length) return null;
     return orders
       .map((o) => new Date(o.created))
       .sort((a, b) => b - a)[0];
   }
+
+export function getFirstSaleDate(orders) {
+    if (!orders.length) return null;
+  
+    if (orders.length === 1) {
+      return new Date(orders[0].created);
+    }
+  
+    return null;
+  }
+  

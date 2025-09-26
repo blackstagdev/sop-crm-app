@@ -1,4 +1,4 @@
-import { getAffiliates, getOrders, getLastOrderDate } from "$lib/goaffpro";
+import { getAffiliates, getOrders, getLastSaleDate, getFirstSaleDate} from "$lib/goaffpro";
 
 export async function GET() {
   try {
@@ -24,14 +24,18 @@ export async function GET() {
     // 4. Build results
     const results = affiliates.map((affiliate) => {
       const affOrders = ordersByAffiliate.get(affiliate.id) ?? [];
-      const lastOrderDate = getLastOrderDate(affOrders);
+      const lastSaleDate = getLastSaleDate(affOrders);
+      const firstSaleDate = getFirstSaleDate(affOrders);
 
       return {
         id: affiliate.id,
         name: affiliate.name,
         email: affiliate.email ? affiliate.email.toLowerCase() : null,
-        lastOrder: lastOrderDate
-    ? lastOrderDate.toISOString().split("T")[0] 
+        lastSale: lastSaleDate
+    ? lastSaleDate.toISOString().split("T")[0] 
+    : null,
+    firstSale: firstSaleDate
+    ? firstSaleDate.toISOString().split("T")[0] 
     : null,
         revenue: affiliate.subtotal_revenue,
         referralCode: affiliate.ref_code
@@ -39,7 +43,7 @@ export async function GET() {
     });
 
     const completeResults = results.filter(r =>
-      r.id && r.name && r.email && r.revenue && r.referralCode && r.lastOrder
+      r.id && r.name && r.email && r.revenue && r.referralCode && r.lastSale && r.firstSale
     );
 
     return new Response(JSON.stringify(completeResults, null, 2), {
