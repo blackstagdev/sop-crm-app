@@ -10,20 +10,18 @@ const jwt = new google.auth.JWT({
 
 const sheets = google.sheets({ version: "v4", auth: jwt });
 
-export async function replaceSheet(spreadsheetId, sheetName, rows) {
+export async function replaceSheet(spreadsheetId, sheetName, rows, headers = []) {
   if (!rows.length) {
     console.log("⚠️ No rows to insert, skipping.");
     return;
   }
 
-  // If rows are objects, extract headers + values
-  let finalRows;
-  if (typeof rows[0] === "object" && !Array.isArray(rows[0])) {
-    const headers = Object.keys(rows[0]);
-    finalRows = [headers, ...rows.map((r) => headers.map((h) => r[h] ?? ""))];
-  } else {
-    finalRows = rows;
-  }
+  // If no custom headers passed → infer headers by length
+  const finalHeaders = headers.length
+    ? headers
+    : Array.from({ length: rows[0].length }, (_, i) => `Column${i + 1}`);
+
+  const finalRows = [finalHeaders, ...rows];
 
   await sheets.spreadsheets.values.update({
     spreadsheetId,
@@ -32,9 +30,10 @@ export async function replaceSheet(spreadsheetId, sheetName, rows) {
     requestBody: { values: finalRows },
   });
 
-  console.log(`✅ Pushed ${rows.length} rows (+header) to Google Sheet`);
+  console.log(
+    `✅ Pushed ${rows.length} rows (+1 header) to ${sheetName}`
+  );
 }
-
 
 export async function getCheckpoint(spreadsheetId, type) {
   const res = await sheets.spreadsheets.values.get({

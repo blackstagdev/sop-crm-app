@@ -1,5 +1,5 @@
 import { json } from "@sveltejs/kit";
-import { replaceSheet } from "$lib/googleSheet.js";
+import { replaceSheet, setCheckpoint } from "$lib/googleSheet.js";
 
 const SPREADSHEET_ID = "1KKmny7DXdsIr0g3437N3m9B4KGQwI0ygeXrr12vkkxA";
 
@@ -25,28 +25,37 @@ export async function POST({ request }) {
       switch (sheet) {
         case "Last Sale Date":
           rows = affiliates
-            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.lastSale);
+            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.lastSale)
+            .map(a => [a.id, a.name, a.email, a.revenue, a.referralCode, a.lastSale]);
+          headers = ["ID", "Name", "Email", "Revenue", "Referral Code", "Last Sale"];
           break;
-
+  
         case "First Sale Date":
           rows = affiliates
-          .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.firstSale);
+            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.firstSale)
+            .map(a => [a.id, a.name, a.email, a.revenue, a.referralCode, a.firstSale]);
+          headers = ["ID", "Name", "Email", "Revenue", "Referral Code", "First Sale"];
           break;
-
+  
         case "Last Order Date":
           rows = customers
-            .filter((c) => c.id && c.name && c.email && c.lastOrderDate);
+            .filter(c => c.id && c.name && c.email && c.lastOrderDate)
+            .map(c => [c.id, c.name, c.email, c.lastOrderDate]);
+          headers = ["ID", "Name", "Email", "Last Order Date"];
           break;
         
         case "First Order Date":
           rows = customers
-            .filter((c) => c.id && c.name && c.email && c.firstOrderDate);
+            .filter(c => c.id && c.name && c.email && c.firstOrderDate)
+            .map(c => [c.id, c.name, c.email, c.firstOrderDate]);
+          headers = ["ID", "Name", "Email", "First Order Date"];
           break;
-
+  
         case "Partners":
-            rows = partners ?? [];
-            break;
-
+          rows = partners?.map(p => Object.values(p)) ?? [];
+          headers = Object.keys(partners?.[0] ?? {}); // infer headers from first partner
+          break;
+  
         default:
           throw new Error(`Unknown sheet: ${sheet}`);
       }
