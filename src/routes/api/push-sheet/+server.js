@@ -13,6 +13,7 @@ export async function POST({ request }) {
 
     // transform based on target sheet
     let rows = [];
+    let headers = [];
     if (sheet === "trackers") {
       if (tracker?.orders) {
         await setCheckpoint(SPREADSHEET_ID, "orders", tracker.orders);
@@ -61,8 +62,10 @@ export async function POST({ request }) {
       }
     }
 
-    // ✅ Write to Google Sheets with headers
-    await replaceSheet(SPREADSHEET_ID, sheet, rows, headers);
+    if (rows.length > 0) {
+      // ✅ Write to Google Sheets with headers
+      await replaceSheet(SPREADSHEET_ID, sheet, rows, headers);
+    }
 
     return json({ success: true, sheet, inserted: rows.length });
   } catch (err) {

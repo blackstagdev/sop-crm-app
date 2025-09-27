@@ -18,7 +18,7 @@ export async function GET(event) {
 
 		const data = await res.json();
 
-		const sheets = ["Last Sale Date", "First Sale Date", "Last Order Date", "First Order Date", "Partners", "GHL Contacts", "trackers"];
+		const sheets = ["Last Sale Date", "First Sale Date", "Last Order Date", "First Order Date", "Partners", "trackers"];
 		const results = [];
 
 		// 2. Push to Google Sheets
