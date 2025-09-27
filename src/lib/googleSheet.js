@@ -35,6 +35,23 @@ export async function replaceSheet(spreadsheetId, sheetName, rows, headers = [])
   );
 }
 
+export async function appendSheet(spreadsheetId, sheetName, rows) {
+  if (!rows.length) {
+    console.log("⚠️ No rows to append, skipping.");
+    return;
+  }
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: sheetName,
+    valueInputOption: "RAW",
+    insertDataOption: "INSERT_ROWS",
+    requestBody: { values: rows },
+  });
+
+  console.log(`✅ Appended ${rows.length} rows to ${sheetName}`);
+}
+
 export async function getCheckpoint(spreadsheetId, type) {
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId,

@@ -1,5 +1,5 @@
 import { json } from "@sveltejs/kit";
-import { replaceSheet, setCheckpoint } from "$lib/googleSheet.js";
+import { replaceSheet, appendSheet, setCheckpoint } from "$lib/googleSheet.js";
 
 const SPREADSHEET_ID = "1KKmny7DXdsIr0g3437N3m9B4KGQwI0ygeXrr12vkkxA";
 
@@ -63,11 +63,18 @@ export async function POST({ request }) {
     }
 
     if (rows.length > 0) {
-      // ✅ Write to Google Sheets with headers
-      await replaceSheet(SPREADSHEET_ID, sheet, rows, headers);
+      if (tracker?.orders && tracker?.affiliates) {
+        // ✅ Append when tracker has both values
+        await appendSheet(SPREADSHEET_ID, sheet, rows);
+        return json({ success: true, sheet, inserted: rows.length, mode: "append" });
+      } else {
+        // ✅ Replace otherwise
+        await replaceSheet(SPREADSHEET_ID, sheet, rows, headers);
+        return json({ success: true, sheet, inserted: rows.length, mode: "replace" });
+      }
     }
 
-    return json({ success: true, sheet, inserted: rows.length });
+    return json({ success: true, sheet, inserted: 0, mode: "skipped" });
   } catch (err) {
     console.error("❌ Push failed:", err);
     return json({ success: false, error: err.message }, { status: 500 });
