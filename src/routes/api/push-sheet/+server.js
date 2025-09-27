@@ -13,47 +13,46 @@ export async function POST({ request }) {
 
     // transform based on target sheet
     let rows = [];
-    switch (sheet) {
-      case "Last Sale Date":
-        rows = affiliates
-          .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.lastSale);
-        break;
-
-      case "First Sale Date":
-        rows = affiliates
-        .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.firstSale);
-        break;
-
-      case "Last Order Date":
-        rows = customers
-          .filter((c) => c.id && c.name && c.email && c.lastOrderDate);
-        break;
-      
-      case "First Order Date":
-        rows = customers
-          .filter((c) => c.id && c.name && c.email && c.firstOrderDate);
-        break;
-
-      case "Partners":
-          rows = partners ?? [];
+    if (sheet === "trackers") {
+      if (tracker?.orders) {
+        await setCheckpoint(SPREADSHEET_ID, "orders", tracker.orders);
+      }
+      if (tracker?.affiliates) {
+        await setCheckpoint(SPREADSHEET_ID, "affiliates", tracker.affiliates);
+      }
+  
+    } else {
+      switch (sheet) {
+        case "Last Sale Date":
+          rows = affiliates
+            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.lastSale);
           break;
 
-      default:
-        throw new Error(`Unknown sheet: ${sheet}`);
+        case "First Sale Date":
+          rows = affiliates
+          .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.firstSale);
+          break;
+
+        case "Last Order Date":
+          rows = customers
+            .filter((c) => c.id && c.name && c.email && c.lastOrderDate);
+          break;
+        
+        case "First Order Date":
+          rows = customers
+            .filter((c) => c.id && c.name && c.email && c.firstOrderDate);
+          break;
+
+        case "Partners":
+            rows = partners ?? [];
+            break;
+
+        default:
+          throw new Error(`Unknown sheet: ${sheet}`);
+      }
     }
 
     await replaceSheet(SPREADSHEET_ID, sheet, rows);
-
-      // trackers handled separately
-      if (sheet === "trackers") {
-        if (tracker?.orders) {
-          await setCheckpoint(SPREADSHEET_ID, "orders", tracker.orders);
-        }
-        if (tracker?.affiliates) {
-          await setCheckpoint(SPREADSHEET_ID, "affiliates", tracker.affiliates);
-        }
-
-      }
 
     return json({ success: true, sheet, inserted: rows.length });
   } catch (err) {
