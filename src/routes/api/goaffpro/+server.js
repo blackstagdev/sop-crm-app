@@ -1,13 +1,18 @@
 import { getAffiliates, getOrders, getLastSaleDate, getFirstSaleDate, getFirstOrder, getLastOrder} from "$lib/goaffpro";
 
-export async function GET() {
+export async function GET({url}) {
+
+  // Read query params
+    const ordersSince = url.searchParams.get("orders_since");
+    const affiliatesSince = url.searchParams.get("affiliates_since");
+
   try {
     // 1. Fetch all affiliates
-    const affiliatesRes = await getAffiliates();
+    const affiliatesRes = await getAffiliates(affiliatesSince);
     const affiliates = affiliatesRes.affiliates ?? affiliatesRes.data ?? [];
 
     // 2. Fetch all orders (without affiliate_id filter)
-    const ordersRes = await getOrders(); // don't pass id
+    const ordersRes = await getOrders(ordersSince); // don't pass id
     const orders = ordersRes.orders ?? ordersRes.data ?? [];
 
     // 3. Group orders by affiliate_id
@@ -32,7 +37,7 @@ export async function GET() {
       lastSale: lastSaleDate ? lastSaleDate.toISOString().split("T")[0] : null,
       firstSale: firstSaleDate ? firstSaleDate.toISOString().split("T")[0] : null,
       revenue: affiliate.subtotal_revenue,
-      referralCode: affiliate.ref_code
+      referralCode: affiliate.ref_code,
     };
   });
 
@@ -70,8 +75,18 @@ export async function GET() {
         firstOrderDate: c.orderCount === 1 ? c.firstOrderDate.toISOString().split("T")[0] : null,
         lastOrderDate: c.lastOrderDate ? c.lastOrderDate.toISOString().split("T")[0] : null
       }));
+
+
+        // 6. Find latest created_at for orders and affiliates
+    const latestOrderDate = orders.length
+    ? new Date(Math.max(...orders.map((o) => new Date(o.created).getTime())))
+    : null;
+
+  const latestAffiliateDate = affiliates.length
+    ? new Date(Math.max(...affiliates.map((a) => new Date(a.created_at).getTime())))
+    : null;
   
-      // 6. Final response object
+      // 7. Final response object
       const completeResults = {
         affiliates: affiliateResults.filter(
           (r) =>
@@ -84,7 +99,11 @@ export async function GET() {
             r.firstSale
         ),
         customers: customerResults,
-        partners: affiliates
+        partners: affiliates,
+        tracker: {
+          orders: latestOrderDate ?? null,
+          affiliates: latestAffiliateDate ?? null,
+        }
       };
   
       return new Response(JSON.stringify(completeResults, null, 2), {
