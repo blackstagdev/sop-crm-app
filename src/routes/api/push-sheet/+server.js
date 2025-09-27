@@ -1,5 +1,5 @@
 import { json } from "@sveltejs/kit";
-import { replaceSheet, appendSheet, setCheckpoint } from "$lib/googleSheet.js";
+import {  getSheetValues, replaceSheet, appendSheet, setCheckpoint } from "$lib/googleSheet.js";
 
 const SPREADSHEET_ID = "1KKmny7DXdsIr0g3437N3m9B4KGQwI0ygeXrr12vkkxA";
 
@@ -63,12 +63,15 @@ export async function POST({ request }) {
     }
 
     if (rows.length > 0) {
-      if (tracker?.orders && tracker?.affiliates) {
-        // ✅ Append when tracker has both values
+      // Fetch existing sheet rows
+      const existing = await getSheetValues(SPREADSHEET_ID, sheet);
+    
+      if (existing && existing.length > 1) {
+        // Sheet already has header + rows → append
         await appendSheet(SPREADSHEET_ID, sheet, rows);
         return json({ success: true, sheet, inserted: rows.length, mode: "append" });
       } else {
-        // ✅ Replace otherwise
+        // Sheet empty (or just header) → replace
         await replaceSheet(SPREADSHEET_ID, sheet, rows, headers);
         return json({ success: true, sheet, inserted: rows.length, mode: "replace" });
       }

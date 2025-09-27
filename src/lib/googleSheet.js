@@ -81,3 +81,12 @@ export async function setCheckpoint(spreadsheetId, type, value) {
   console.log(`✅ Updated checkpoint for ${type} → ${value}`);
 }
 
+export async function getSheetValues(spreadsheetId, sheetName) {
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: sheetName,
+  });
+  return res.data.values || null;
+}
+
+
