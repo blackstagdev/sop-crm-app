@@ -61,7 +61,8 @@ export async function POST({ request }) {
       }
     }
 
-    await replaceSheet(SPREADSHEET_ID, sheet, rows);
+    // ✅ Write to Google Sheets with headers
+    await replaceSheet(SPREADSHEET_ID, sheet, rows, headers);
 
     return json({ success: true, sheet, inserted: rows.length });
   } catch (err) {
