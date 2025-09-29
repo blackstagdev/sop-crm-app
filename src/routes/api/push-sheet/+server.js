@@ -5,7 +5,7 @@ const SPREADSHEET_ID = "1KKmny7DXdsIr0g3437N3m9B4KGQwI0ygeXrr12vkkxA";
 
 export async function POST({ request }) {
   try {
-    const { affiliates, customers, partners, sheet, tracker } = await request.json();
+    const { affiliates, customers, partners, sheet, tracker, contacts } = await request.json();
   
     if (!sheet) {
       throw new Error("Missing `sheet` parameter");
@@ -54,7 +54,12 @@ export async function POST({ request }) {
   
         case "Partners":
           rows = partners?.map(p => Object.values(p)) ?? [];
-          headers = Object.keys(partners?.[0] ?? {}); // infer headers from first partner
+          headers = Object.keys(partners?.[0] ?? {}); 
+          break;
+        
+        case "GHL Contacts":
+          rows = contacts?.map(p => Object.values(p)) ?? [];
+          headers = Object.keys(contacts?.[0] ?? {}); 
           break;
   
         default:

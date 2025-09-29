@@ -16,9 +16,12 @@ export async function GET(event) {
 			)}&affiliates_since=${encodeURIComponent(latestAffiliatesDate || "")}`
 		  );
 
-		const data = await res.json();
+		  const ghlRes = await event.fetch('/api/ghl');
+		  
+		  const data = await res.json();
+		  const ghlData = await ghlRes.json();
 
-		const sheets = ["Last Sale Date", "First Sale Date", "Last Order Date", "First Order Date", "Partners", "trackers"];
+		const sheets = ["Last Sale Date", "First Sale Date", "Last Order Date", "First Order Date", "Partners","trackers"];
 		const results = [];
 
 		// 2. Push to Google Sheets
@@ -31,6 +34,13 @@ export async function GET(event) {
 			const result = await pushRes.json();
 			results.push(result);
 		  }
+
+		const ghlPushRes = await event.fetch('/api/push-sheet', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ ...ghlData, sheet: "GHL Contacts" })
+		});
+		results.push(await ghlPushRes.json());
 
 		return json({ success: true, results });
 	} catch (err) {

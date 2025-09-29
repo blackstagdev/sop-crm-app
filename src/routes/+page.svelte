@@ -50,6 +50,20 @@
 			loading = false;
 		}
 	}
+
+	// fetch GHL contacts
+	async function loadGHL() {
+		loading = true;
+		try {
+			const res = await fetch('/api/ghl');
+			const data = await res.json();
+			console.log(data);
+		} catch (err) {
+			console.error('Error loading ghl:', err);
+		} finally {
+			loading = false;
+		}
+	}
 </script>
 
 <button
@@ -57,7 +71,15 @@
 	disabled={loading}
 	class="cursor-pointer bg-gray-800 px-4 py-2 text-white"
 >
-	{loading ? 'Refreshing...' : 'Load Data'}
+	{loading ? 'Refreshing...' : 'Load Data Affiliate'}
+</button>
+
+<button
+	on:click={loadGHL}
+	disabled={loading}
+	class="cursor-pointer bg-gray-800 px-4 py-2 text-white"
+>
+	{loading ? 'Refreshing...' : 'Load Data GHL'}
 </button>
 
 <button on:click={pushToSheet} class="ml-4 cursor-pointer bg-gray-800 px-4 py-2 text-white"
