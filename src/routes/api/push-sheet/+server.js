@@ -58,8 +58,20 @@ export async function POST({ request }) {
           break;
         
         case "GHL Contacts":
-          rows = contacts?.map(p => Object.values(p)) ?? [];
-          headers = Object.keys(contacts?.[0] ?? {}); 
+          if (Array.isArray(contacts) && contacts.length > 0) {
+          
+            const keySet = new Set();
+            contacts.forEach(c => {
+              Object.keys(c).forEach(k => keySet.add(k));
+            });
+        
+            headers = Array.from(keySet);
+        
+            rows = contacts.map(c => headers.map(h => c[h] ?? ""));
+          } else {
+            rows = [];
+            headers = [];
+          }
           break;
   
         default:

@@ -8,13 +8,38 @@ const GHL_API_KEY = 'pit-13bada01-23cd-484e-909c-e9f49fc24546';
 const LOCATION_ID = 'YKo6A5vmDaEqPUyWAi1r'; // replace with your real locationId
 const PAGE_LIMIT = 500; // must be a number (<=500)
 
+//flatten helper function for google sheet
+function flattenValue(val) {
+  if (Array.isArray(val)) {
+    return val.map(v => {
+      if (typeof v === "object" && v !== null) {
+        return Object.entries(v).map(([k, v2]) => `${k}:${v2}`).join("|");
+      }
+      return v;
+    }).join(", ");
+  }
+  if (typeof val === "object" && val !== null) {
+    return Object.entries(val).map(([k, v2]) => `${k}:${v2}`).join("|");
+  }
+  return val ?? "";
+}
+
+function flattenContact(contact) {
+  const out = {};
+  for (const [key, val] of Object.entries(contact)) {
+    out[key] = flattenValue(val);
+  }
+  return out;
+}
+
+
 /**
  * Fetch one page of contacts (cursor-based, POST body required).
  */
 async function fetchContactsPage({ searchAfter }) {
   const body = {
-    locationId: LOCATION_ID,       // string ✅
-    pageLimit: Number(PAGE_LIMIT), // number ✅
+    locationId: LOCATION_ID,      
+    pageLimit: Number(PAGE_LIMIT), 
   };
 
   if (searchAfter) {
@@ -60,9 +85,11 @@ export async function GET() {
     }
   }
 
+    const flattenedContacts = allContacts.map(flattenContact);
+
   return json({
     locationId: LOCATION_ID,
     count: allContacts.length,
-    contacts: allContacts
+    contacts: flattenedContacts
   });
 }
