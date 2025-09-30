@@ -8,29 +8,25 @@ const GHL_API_KEY = 'pit-13bada01-23cd-484e-909c-e9f49fc24546';
 const LOCATION_ID = 'YKo6A5vmDaEqPUyWAi1r'; // replace with your real locationId
 const PAGE_LIMIT = 500; // must be a number (<=500)
 
-//flatten helper function for google sheet
-function flattenValue(val) {
-  if (Array.isArray(val)) {
-    return val.map(v => {
-      if (typeof v === "object" && v !== null) {
-        return Object.entries(v).map(([k, v2]) => `${k}:${v2}`).join("|");
+// flatten a single contact using field.id as key
+function flattenContact(contact) {
+  const { customFields, ...rest } = contact;
+
+  const flattenedFields = {};
+  if (Array.isArray(customFields)) {
+    for (const field of customFields) {
+      if (field.id && field.value !== undefined) {
+        flattenedFields[field.id] = field.value;
       }
-      return v;
-    }).join(", ");
+    }
   }
-  if (typeof val === "object" && val !== null) {
-    return Object.entries(val).map(([k, v2]) => `${k}:${v2}`).join("|");
-  }
-  return val ?? "";
+
+  return { ...rest, ...flattenedFields };
 }
 
-function flattenContact(contact) {
-  const out = {};
-  for (const [key, val] of Object.entries(contact)) {
-    out[key] = flattenValue(val);
-  }
-  return out;
-}
+
+
+
 
 
 /**
@@ -85,7 +81,7 @@ export async function GET() {
     }
   }
 
-    const flattenedContacts = allContacts.map(flattenContact);
+  const flattenedContacts = allContacts.map(flattenContact);
 
   return json({
     locationId: LOCATION_ID,
