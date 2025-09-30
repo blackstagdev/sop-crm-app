@@ -8,26 +8,34 @@ const GHL_API_KEY = 'pit-13bada01-23cd-484e-909c-e9f49fc24546';
 const LOCATION_ID = 'YKo6A5vmDaEqPUyWAi1r'; // replace with your real locationId
 const PAGE_LIMIT = 500; // must be a number (<=500)
 
-// flatten a single contact using field.id as key
-function flattenContact(contact) {
-  const { customFields, ...rest } = contact;
+// --- Recursive Flatten Helper ---
+function flattenObject(obj, prefix = '', res = {}) {
+  for (const [key, value] of Object.entries(obj)) {
+    const newKey = prefix ? `${prefix}_${key}` : key;
 
-  const flattenedFields = {};
-  if (Array.isArray(customFields)) {
-    for (const field of customFields) {
-      if (field.id && field.value !== undefined) {
-        flattenedFields[field.id] = field.value;
+    if (Array.isArray(value)) {
+      // array of primitives → join into single string
+      if (value.every(v => typeof v !== 'object' || v === null)) {
+        res[newKey] = value.join(', ');
+      } else {
+        // array of objects → flatten each with index
+        value.forEach((v, i) => {
+          flattenObject(v, `${newKey}_${i}`, res);
+        });
       }
+    } else if (value !== null && typeof value === 'object') {
+      // nested object → recurse
+      flattenObject(value, newKey, res);
+    } else {
+      res[newKey] = value ?? '';
     }
   }
-
-  return { ...rest, ...flattenedFields };
+  return res;
 }
 
-
-
-
-
+function flattenContact(contact) {
+  return flattenObject(contact);
+}
 
 /**
  * Fetch one page of contacts (cursor-based, POST body required).
