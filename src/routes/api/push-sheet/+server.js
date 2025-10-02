@@ -29,30 +29,30 @@ export async function POST({ request }) {
       switch (sheet) {
         case "Last Sale Date":
           rows = affiliates
-            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.lastSale)
-            .map(a => [a.id, a.name, a.email, a.revenue, a.referralCode, a.lastSale]);
-          headers = ["ID", "Name", "Email", "Revenue", "Referral Code", "Last Sale"];
+            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.lastSale && a.totalSale)
+            .map(a => [a.id, a.name, a.email, a.revenue, a.referralCode, a.lastSale, a.totalSale]);
+          headers = ["ID", "Name", "Email", "Revenue", "Referral Code", "Last Sale", "Sale"];
           break;
   
         case "First Sale Date":
           rows = affiliates
-            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.firstSale)
-            .map(a => [a.id, a.name, a.email, a.revenue, a.referralCode, a.firstSale]);
-          headers = ["ID", "Name", "Email", "Revenue", "Referral Code", "First Sale"];
+            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.firstSale && a.totalSale)
+            .map(a => [a.id, a.name, a.email, a.revenue, a.referralCode, a.firstSale, a.totalSale]);
+          headers = ["ID", "Name", "Email", "Revenue", "Referral Code", "First Sale", "Sale"];
           break;
   
         case "Last Order Date":
           rows = customers
-            .filter(c => c.id && c.name && c.email && c.lastOrderDate)
-            .map(c => [c.id, c.name, c.email, c.lastOrderDate]);
-          headers = ["ID", "Name", "Email", "Last Order Date"];
+            .filter(c => c.id && c.name && c.email && c.lastOrderDate && c.totalSale && c.revenue)
+            .map(c => [c.id, c.name, c.email, c.lastOrderDate, c.totalSale, c.revenue]);
+          headers = ["ID", "Name", "Email", "Last Order Date", "Sale", "Revenue"];
           break;
         
         case "First Order Date":
           rows = customers
-            .filter(c => c.id && c.name && c.email && c.firstOrderDate)
-            .map(c => [c.id, c.name, c.email, c.firstOrderDate]);
-          headers = ["ID", "Name", "Email", "First Order Date"];
+            .filter(c => c.id && c.name && c.email && c.firstOrderDate && c.totalSale && c.revenue)
+            .map(c => [c.id, c.name, c.email, c.firstOrderDate, c.totalSale, c.revenue]);
+          headers = ["ID", "Name", "Email", "First Order Date", "Sale", "Revenue"];
           break;
   
         case "Partners":

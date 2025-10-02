@@ -68,6 +68,7 @@ export async function setCheckpoint(spreadsheetId, type, value) {
   let range = "";
   if (type === "orders") range = `Trackers!A2`;
   if (type === "affiliates") range = `Trackers!B2`;
+  if (type === "ghlContacts") range = `Trackers!C2`;
 
   if (!range) throw new Error(`Unknown checkpoint type: ${type}`);
 

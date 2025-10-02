@@ -59,7 +59,8 @@ export async function GET({url}) {
             orderCount: 1,
             firstOrderDate: createdAt,
             lastOrderDate: createdAt,
-            totalSale: o.total
+            totalSale: o.total,
+            revenue: o.subtotal
           });
         } else {
           const c = customerMap.get(key);
@@ -76,7 +77,8 @@ export async function GET({url}) {
         email: c.email,
         firstOrderDate: c.orderCount === 1 ? c.firstOrderDate.toISOString().split("T")[0] : null,
         lastOrderDate: c.lastOrderDate ? c.lastOrderDate.toISOString().split("T")[0] : null,
-        totalSale: c.totalSale
+        totalSale: c.totalSale,
+        revenue: c.revenue
       }));
 
 
