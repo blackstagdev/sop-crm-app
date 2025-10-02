@@ -22,7 +22,7 @@ export async function POST({ request }) {
         await setCheckpoint(SPREADSHEET_ID, "affiliates", tracker.affiliates);
       }
       if (tracker?.ghlContacts) {
-        await setCheckpoint(SPREADSHEET_ID, "ghlContacts", tracker.ghlContacts);
+        await setCheckpoint(SPREADSHEET_ID, "ghlContacts", JSON.stringify(tracker.ghlContacts));
       }
   
     } else {

@@ -1,6 +1,5 @@
 // src/routes/api/ghl/+server.js
 import { json } from '@sveltejs/kit';
-import { getCheckpoint, setCheckpoint } from '$lib/googleSheet.js';
 
 const GHL_API_BASE = 'https://services.leadconnectorhq.com';
 const GHL_API_KEY = 'pit-13bada01-23cd-484e-909c-e9f49fc24546';
@@ -83,12 +82,10 @@ export async function GET(event) {
   // Otherwise → fall back to Google Sheet checkpoint
   if (searchAfterParam) {
     try {
-      searchAfter = JSON.parse(searchAfterParam); // it’s an array, so parse
+      searchAfter = JSON.parse(searchAfterParam); 
     } catch {
-      searchAfter = searchAfterParam; // fallback (string)
+      searchAfter = searchAfterParam; 
     }
-  } else {
-    searchAfter = await getCheckpoint(SPREADSHEET_ID, CHECKPOINT_KEY) ?? null;
   }
 
   while (keepGoing) {
@@ -107,11 +104,6 @@ export async function GET(event) {
     if (allContacts.length >= 20000) {
       keepGoing = false;
     }
-  }
-
-  if (lastSearchAfter && !searchAfterParam) {
-    // only update sheet checkpoint if we weren’t overriding via query
-    await setCheckpoint(SPREADSHEET_ID, CHECKPOINT_KEY, lastSearchAfter);
   }
 
   const flattenedContacts = allContacts.map(flattenContact);
