@@ -30,16 +30,16 @@ export async function POST({ request }) {
       switch (sheet) {
         case "Last Sale Date":
           rows = affiliates
-            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.lastSale || a.totalSale)
-            .map(a => [a.id, a.name, a.email, a.revenue, a.referralCode, a.lastSale, a.totalSale]);
-          headers = ["ID", "Name", "Email", "Revenue", "Referral Code", "Last Sale", "Sale"];
+            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.lastSale)
+            .map(a => [a.id, a.name, a.email, a.revenue, a.referralCode, a.lastSale]);
+          headers = ["ID", "Name", "Email", "Revenue", "Referral Code", "Last Sale"];
           break;
   
         case "First Sale Date":
           rows = affiliates
-            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.firstSale || a.totalSale)
-            .map(a => [a.id, a.name, a.email, a.revenue, a.referralCode, a.firstSale, a.totalSale]);
-          headers = ["ID", "Name", "Email", "Revenue", "Referral Code", "First Sale", "Sale"];
+            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.firstSale)
+            .map(a => [a.id, a.name, a.email, a.revenue, a.referralCode, a.firstSale]);
+          headers = ["ID", "Name", "Email", "Revenue", "Referral Code", "First Sale"];
           break;
   
         case "Last Order Date":

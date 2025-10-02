@@ -37,8 +37,7 @@ export async function GET({url}) {
       lastSale: lastSaleDate ? lastSaleDate.toISOString().split("T")[0] : null,
       firstSale: firstSaleDate ? firstSaleDate.toISOString().split("T")[0] : null,
       revenue: affiliate.subtotal_revenue,
-      referralCode: affiliate.ref_code,
-      totalSale: affiliate.total
+      referralCode: affiliate.ref_code
     };
   });
 
@@ -100,7 +99,6 @@ export async function GET({url}) {
             r.email &&
             r.revenue &&
             r.referralCode &&
-            r.totalSale &&
             r.lastSale ||
             r.firstSale
         ),
