@@ -42,6 +42,13 @@ export async function GET(event) {
 		});
 		results.push(await ghlPushRes.json());
 
+		const trackerPushRes = await event.fetch('/api/push-sheet', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ ...ghlData, sheet: "trackers" })
+		  });
+		  results.push(await trackerPushRes.json());
+
 		return json({ success: true, results });
 	} catch (err) {
 		console.error('Daily job failed:', err);

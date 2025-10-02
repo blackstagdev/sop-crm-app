@@ -14,7 +14,6 @@ export async function POST({ request }) {
     // transform based on target sheet
     let rows = [];
     let headers = [];
-    console.log(tracker)
     if (sheet === "trackers") {
       if (tracker?.orders) {
         await setCheckpoint(SPREADSHEET_ID, "orders", tracker.orders);
