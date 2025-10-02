@@ -72,11 +72,16 @@ async function fetchContactsPage({ searchAfter }) {
 
 export async function GET() {
 
-  let searchAfter = await getCheckpoint(SPREADSHEET_ID, CHECKPOINT_KEY) ?? null;
-
   const allContacts = [];
+  let searchAfter = null;
   let keepGoing = true;
   let lastSearchAfter = null;
+
+  let searchAfterTracking = await getCheckpoint(SPREADSHEET_ID, CHECKPOINT_KEY) ?? null;
+
+  if(searchAfterTracking) {
+    searchAfter = searchAfterTracking;
+  }
 
   while (keepGoing) {
     const data = await fetchContactsPage({ searchAfter });
