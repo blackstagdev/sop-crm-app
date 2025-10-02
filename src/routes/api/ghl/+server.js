@@ -73,15 +73,10 @@ async function fetchContactsPage({ searchAfter }) {
 export async function GET() {
 
   const allContacts = [];
-  let searchAfter = null;
   let keepGoing = true;
   let lastSearchAfter = null;
 
-  let searchAfterTracking = await getCheckpoint(SPREADSHEET_ID, CHECKPOINT_KEY) ?? null;
-
-  if(searchAfterTracking) {
-    searchAfter = searchAfterTracking;
-  }
+  let searchAfter = await getCheckpoint(SPREADSHEET_ID, CHECKPOINT_KEY) ?? null;
 
   while (keepGoing) {
     const data = await fetchContactsPage({ searchAfter });
@@ -101,9 +96,12 @@ export async function GET() {
     }
   }
 
-    if (lastSearchAfter) {
-      await setCheckpoint(SPREADSHEET_ID, CHECKPOINT_KEY, lastSearchAfter);
+  if (allContacts.length > 0) {
+    const last = allContacts[allContacts.length - 1]?.searchAfter;
+    if (last) {
+      await setCheckpoint(SPREADSHEET_ID, CHECKPOINT_KEY, last);
     }
+  }
 
   const flattenedContacts = allContacts.map(flattenContact);
 

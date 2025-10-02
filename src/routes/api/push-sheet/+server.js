@@ -14,6 +14,7 @@ export async function POST({ request }) {
     // transform based on target sheet
     let rows = [];
     let headers = [];
+    console.log(tracker)
     if (sheet === "trackers") {
       if (tracker?.orders) {
         await setCheckpoint(SPREADSHEET_ID, "orders", tracker.orders);
@@ -29,14 +30,14 @@ export async function POST({ request }) {
       switch (sheet) {
         case "Last Sale Date":
           rows = affiliates
-            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.lastSale && a.totalSale)
+            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.lastSale || a.totalSale)
             .map(a => [a.id, a.name, a.email, a.revenue, a.referralCode, a.lastSale, a.totalSale]);
           headers = ["ID", "Name", "Email", "Revenue", "Referral Code", "Last Sale", "Sale"];
           break;
   
         case "First Sale Date":
           rows = affiliates
-            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.firstSale && a.totalSale)
+            .filter(a => a.id && a.name && a.email && a.revenue && a.referralCode && a.firstSale || a.totalSale)
             .map(a => [a.id, a.name, a.email, a.revenue, a.referralCode, a.firstSale, a.totalSale]);
           headers = ["ID", "Name", "Email", "Revenue", "Referral Code", "First Sale", "Sale"];
           break;

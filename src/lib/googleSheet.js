@@ -55,12 +55,13 @@ export async function appendSheet(spreadsheetId, sheetName, rows) {
 export async function getCheckpoint(spreadsheetId, type) {
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId,
-    range: `Trackers!A2:B2`, // only fetch the second row (values)
+    range: `Trackers!A2:C2`, // only fetch the second row (values)
   });
 
   const values = res.data.values?.[0] || [];
   if (type === "orders") return values[0] || null;
   if (type === "affiliates") return values[1] || null;
+  if (type === "ghlContacts") return values[1] || null;
   return null;
 }
 
