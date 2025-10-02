@@ -61,7 +61,7 @@ export async function getCheckpoint(spreadsheetId, type) {
   const values = res.data.values?.[0] || [];
   if (type === "orders") return values[0] || null;
   if (type === "affiliates") return values[1] || null;
-  if (type === "ghlContacts") return values[1] || null;
+  if (type === "ghlContacts") return values[2] || null;
   return null;
 }
 

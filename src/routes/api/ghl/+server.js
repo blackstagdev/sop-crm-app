@@ -70,13 +70,26 @@ async function fetchContactsPage({ searchAfter }) {
   return resp.json();
 }
 
-export async function GET() {
+export async function GET(event) {
+  const url = new URL(event.url);
+  const searchAfterParam = url.searchParams.get("searchAfter");
 
   const allContacts = [];
+  let searchAfter = null;
   let keepGoing = true;
   let lastSearchAfter = null;
 
-  let searchAfter = await getCheckpoint(SPREADSHEET_ID, CHECKPOINT_KEY) ?? null;
+  // If searchAfter is passed in query → use it
+  // Otherwise → fall back to Google Sheet checkpoint
+  if (searchAfterParam) {
+    try {
+      searchAfter = JSON.parse(searchAfterParam); // it’s an array, so parse
+    } catch {
+      searchAfter = searchAfterParam; // fallback (string)
+    }
+  } else {
+    searchAfter = await getCheckpoint(SPREADSHEET_ID, CHECKPOINT_KEY) ?? null;
+  }
 
   while (keepGoing) {
     const data = await fetchContactsPage({ searchAfter });
@@ -96,11 +109,9 @@ export async function GET() {
     }
   }
 
-  if (allContacts.length > 0) {
-    const last = allContacts[allContacts.length - 1]?.searchAfter;
-    if (last) {
-      await setCheckpoint(SPREADSHEET_ID, CHECKPOINT_KEY, last);
-    }
+  if (lastSearchAfter && !searchAfterParam) {
+    // only update sheet checkpoint if we weren’t overriding via query
+    await setCheckpoint(SPREADSHEET_ID, CHECKPOINT_KEY, lastSearchAfter);
   }
 
   const flattenedContacts = allContacts.map(flattenContact);
@@ -112,3 +123,4 @@ export async function GET() {
     contacts: flattenedContacts
   });
 }
+

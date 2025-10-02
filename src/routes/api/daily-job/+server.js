@@ -15,10 +15,14 @@ export async function GET(event) {
 			  latestOrdersDate || ""
 			)}&affiliates_since=${encodeURIComponent(latestAffiliatesDate || "")}`
 		  );
-
-		  const ghlRes = await event.fetch('/api/ghl');
-		  
 		  const data = await res.json();
+
+		  const latestGhlCheckpoint = await getCheckpoint(SPREADSHEET_ID, "ghlContacts");
+
+          // Fetch GHL with searchAfter param
+	      const ghlRes = await event.fetch(
+			`/api/ghl?searchAfter=${encodeURIComponent(latestGhlCheckpoint || "")}`
+			);
 		  const ghlData = await ghlRes.json();
 
 		const sheets = ["Last Sale Date", "First Sale Date", "Last Order Date", "First Order Date", "Partners","trackers"];
@@ -45,7 +49,7 @@ export async function GET(event) {
 		const trackerPushRes = await event.fetch('/api/push-sheet', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ ...ghlData, sheet: "trackers" })
+			body: JSON.stringify({ tracker: ghlData.tracker, sheet: "trackers" })
 		  });
 		  results.push(await trackerPushRes.json());
 
