@@ -21,6 +21,9 @@ export async function POST({ request }) {
       if (tracker?.affiliates) {
         await setCheckpoint(SPREADSHEET_ID, "affiliates", tracker.affiliates);
       }
+      if (tracker?.ghlContacts) {
+        await setCheckpoint(SPREADSHEET_ID, "ghlContacts", tracker.ghlContacts);
+      }
   
     } else {
       switch (sheet) {

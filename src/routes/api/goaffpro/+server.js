@@ -38,6 +38,7 @@ export async function GET({url}) {
       firstSale: firstSaleDate ? firstSaleDate.toISOString().split("T")[0] : null,
       revenue: affiliate.subtotal_revenue,
       referralCode: affiliate.ref_code,
+      totalSale: affiliate.total
     };
   });
 
@@ -57,7 +58,8 @@ export async function GET({url}) {
             email: o.customer?.email ?? o.customer_email ?? null,
             orderCount: 1,
             firstOrderDate: createdAt,
-            lastOrderDate: createdAt
+            lastOrderDate: createdAt,
+            totalSale: o.total
           });
         } else {
           const c = customerMap.get(key);
@@ -73,7 +75,8 @@ export async function GET({url}) {
         name: c.name,
         email: c.email,
         firstOrderDate: c.orderCount === 1 ? c.firstOrderDate.toISOString().split("T")[0] : null,
-        lastOrderDate: c.lastOrderDate ? c.lastOrderDate.toISOString().split("T")[0] : null
+        lastOrderDate: c.lastOrderDate ? c.lastOrderDate.toISOString().split("T")[0] : null,
+        totalSale: c.totalSale
       }));
 
 
@@ -95,6 +98,7 @@ export async function GET({url}) {
             r.email &&
             r.revenue &&
             r.referralCode &&
+            r.totalSale &&
             r.lastSale ||
             r.firstSale
         ),
