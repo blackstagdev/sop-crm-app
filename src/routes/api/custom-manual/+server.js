@@ -3,7 +3,7 @@ import { json } from "@sveltejs/kit";
 import { appendSheet } from "$lib/googleSheet.js";
 
 // ✅ Optional: define your API key
-const API_KEY = "mysecretapikey";
+const API_KEY = "mysecretapikey_blackstag2025";
 
 export async function OPTIONS() {
   // Preflight CORS
@@ -57,6 +57,7 @@ export async function POST({ request }) {
       data.topic_name,
       data.item_fact,
       data.submitted_at,
+      data.answer_summary
     ]];
 
     await appendSheet(SPREADSHEET_ID, SHEET_NAME, rows);
